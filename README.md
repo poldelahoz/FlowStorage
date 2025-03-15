@@ -1,7 +1,7 @@
 
 # FlowStorage Library
 
-**FluentStorage is free, but powered by [your donations](https://github.com/sponsors/poldelahoz)**
+**FlowStorage is free, but powered by [your donations](https://github.com/sponsors/poldelahoz)**
 
 ![NuGet Version](https://img.shields.io/nuget/vpre/FlowStorage)
 ![NuGet Downloads](https://img.shields.io/nuget/dt/FlowStorage)
