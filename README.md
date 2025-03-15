@@ -1,4 +1,20 @@
-# FlowStorage Library
+
+
+<h1 align="center">
+FlowStorage Library
+</h1>
+
+<p align="center">
+<a href="https://www.nuget.org/packages/FlowStorage"><img src="https://img.shields.io/nuget/vpre/FlowStorage.svg" alt="Version" /></a>
+<a href="https://www.nuget.org/packages/FlowStorage"><img src="https://img.shields.io/nuget/dt/FlowStorage.svg" alt="Downloads" /></a>
+<a href="https://github.com/robinrodricks/FlowStorage/graphs/contributors"><img src="https://img.shields.io/github/contributors/robinrodricks/FlowStorage.svg" alt="GitHub contributors" /></a>
+<a href="https://www.codacy.com/gh/robinrodricks/FlowStorage/dashboard"><img src="https://app.codacy.com/project/badge/Grade/8bc33aa55cb8494da3a7a07dba5316f7" alt="Codacy Badge" /></a>
+<a href="https://github.com/robinrodricks/FlowStorage/blob/develop/LICENSE"><img src="https://img.shields.io/github/license/robinrodricks/FluentStorage.svg" alt="License" /></a>
+</p>
+
+<p align="center">
+    <b>FluentStorage is free, but powered by</b> <a href="https://github.com/sponsors/robinrodricks"><b>your donations</b></a>
+</p>
 
 FlowStorage es una librería desarrollada en .NET 8 que proporciona una abstracción para gestionar el almacenamiento de datos en flujos ("flow storage").  
 La librería permite trabajar tanto con almacenamiento local (sistema de ficheros) como con Azure Blob Storage, ofreciendo una solución flexible y escalable para aplicaciones distribuidas.
