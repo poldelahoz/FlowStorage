@@ -3,39 +3,26 @@ using FlowStorage.Services;
 using FlowStorage;
 using FlowStorageTests.IntegrationTests.Infrastructure;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlowStorageTests.IntegrationTests.Tests
 {
     [Collection("Azurite collection")]
-    public class AzureBlobFlowStorageConcurrencyTests
+    public class AzureBlobFlowStorageConcurrencyTests(AzuriteFixture fixture)
     {
-        private readonly AzuriteFixture _azuriteFixture;
-        private readonly AzureBlobFlowStorage _azureBlobFlowStorage;
-        private readonly string _containerName = "concurrentazurecontainer";
-
-        public AzureBlobFlowStorageConcurrencyTests(AzuriteFixture fixture)
-        {
-            _azuriteFixture = fixture;
-
-            var blobServiceClientFactory = new BlobServiceClientFactory();
-            var logger = new LoggerFactory().CreateLogger<IFlowStorage>();
-
-            _azureBlobFlowStorage = new AzureBlobFlowStorage(
-                _azuriteFixture.ConnectionString,
-                blobServiceClientFactory,
-                logger);
-        }
-
         [Fact]
         public async Task ConcurrentUploadsAndDownloads_AzureBlobFlowStorage_ShouldSucceed()
         {
             // Arrange
-            await _azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
+            string _containerName = "concurrentazurecontainer";
+            var blobServiceClientFactory = new BlobServiceClientFactory();
+            var logger = new LoggerFactory().CreateLogger<IFlowStorage>();
+
+            var azureBlobFlowStorage = new AzureBlobFlowStorage(
+                fixture.ConnectionString,
+                blobServiceClientFactory,
+                logger);
+
+            await azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
 
             int numberOfFiles = 20;
             var uploadTasks = new List<Task>();
@@ -47,7 +34,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
                 {
                     string fileName = $"azurefile_{fileIndex}.txt";
                     string content = $"Azure content for file {fileIndex}";
-                    await _azureBlobFlowStorage.UploadFileAsync(_containerName, fileName, content);
+                    await azureBlobFlowStorage.UploadFileAsync(_containerName, fileName, content);
                 }));
             }
             await Task.WhenAll(uploadTasks);
@@ -63,7 +50,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
                     try
                     {
                         string fileName = $"azurefile_{fileIndex}.txt";
-                        string downloadedContent = await _azureBlobFlowStorage.ReadFileAsync(_containerName, fileName);
+                        string downloadedContent = await azureBlobFlowStorage.ReadFileAsync(_containerName, fileName);
                         Assert.Equal($"Azure content for file {fileIndex}", downloadedContent);
                     }
                     catch (Exception ex)

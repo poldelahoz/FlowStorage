@@ -52,11 +52,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
         public async Task CreateContainerIfNotExistsAsync_CreatesContainerIfNotExistsSuccessfully()
         {
             // Arrange
-            try
-            {
-                await _azureBlobFlowStorage.DeleteContainerAsync(_containerName);
-            }
-            catch {}
+            await _azureBlobFlowStorage.DeleteContainerAsync(_containerName);
 
             // Act
             await _azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
