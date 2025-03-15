@@ -8,7 +8,7 @@ FlowStorage Library
 <a href="https://www.nuget.org/packages/FlowStorage"><img src="https://img.shields.io/nuget/vpre/FlowStorage.svg" alt="Version" /></a>
 <a href="https://www.nuget.org/packages/FlowStorage"><img src="https://img.shields.io/nuget/dt/FlowStorage.svg" alt="Downloads" /></a>
 <a href="https://github.com/robinrodricks/FlowStorage/graphs/contributors"><img src="https://img.shields.io/github/contributors/robinrodricks/FlowStorage.svg" alt="GitHub contributors" /></a>
-<a href="https://www.codacy.com/gh/robinrodricks/FlowStorage/dashboard"><img src="https://app.codacy.com/project/badge/Grade/8bc33aa55cb8494da3a7a07dba5316f7" alt="Codacy Badge" /></a>
+<a href="https://www.codacy.com/gh/robinrodricks/FlowStorage/dashboard"><img src="https://app.codacy.com/project/badge/Grade/691e960f4e1a45e58e3556acaf3adf5c" alt="Codacy Badge" /></a>
 <a href="https://github.com/robinrodricks/FlowStorage/blob/develop/LICENSE"><img src="https://img.shields.io/github/license/robinrodricks/FluentStorage.svg" alt="License" /></a>
 </p>
 
@@ -21,20 +21,20 @@ La librería permite trabajar tanto con almacenamiento local (sistema de fichero
 
 ## Características
 
-- **Abstracciones y Contratos**  
+  - **Abstracciones y Contratos**  
   Define interfaces que permiten interactuar con el almacenamiento sin depender de implementaciones específicas.
 
-- **Soporte para Múltiples Almacenamientos**  
-  - **LocalFlowStorage**: Implementación basada en el sistema de ficheros local.  
-  - **AzureBlobFlowStorage**: Implementación que utiliza Azure Blob Storage (integración con wrappers para facilitar testing y abstraer el SDK).
+  - **Soporte para Múltiples Almacenamientos**  
+    - **LocalFlowStorage**: Implementación basada en el sistema de ficheros local.  
+    - **AzureBlobFlowStorage**: Implementación que utiliza Azure Blob Storage (integración con wrappers para facilitar testing y abstraer el SDK).
 
-- **Patrón Factory**  
+  - **Patrón Factory**  
   La clase `FlowStorageFactory` permite crear la implementación correcta de `IFlowStorage` en función de la configuración (mediante enumerados y variables de entorno).
 
-- **Integración con Dependency Injection (DI)**  
+  - **Integración con Dependency Injection (DI)**  
   Extensión `AddFlowStorage` para registrar en el contenedor de dependencias solo las implementaciones necesarias según el tipo de almacenamiento configurado.
 
-- **Tests Unitarios y de Integración**  
+  - **Tests Unitarios y de Integración**
   Cobertura completa con tests unitarios, tests de integración (usando TestContainers y Azurite para Azure, y directorios temporales para almacenamiento local), tests de casos extremos y pruebas de concurrencia.
 
 ## Requisitos

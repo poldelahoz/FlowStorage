@@ -183,7 +183,7 @@ namespace FlowStorage.Services
         private string GetFullPath(string containerName, string filePath) => Path.Combine(_basePath, containerName, filePath);
         private bool ContainerExists(string containerName) => _fileSystem.Directory.Exists(GetFullPath(containerName, string.Empty));
         private bool FileExists(string containerName, string filePath) => _fileSystem.File.Exists(GetFullPath(containerName, filePath));
-        private bool EnsureContainerExists(string containerName)
+        private void EnsureContainerExists(string containerName)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
 
@@ -191,10 +191,8 @@ namespace FlowStorage.Services
             {
                 throw new Exception("Container " + containerName + " does not exist.");
             }
-
-            return true;
         }
-        private bool EnsureFileExists(string containerName, string filePath)
+        private void EnsureFileExists(string containerName, string filePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
@@ -203,8 +201,6 @@ namespace FlowStorage.Services
             {
                 throw new Exception("File " + filePath + " does not exist in Container " + containerName + ".");
             }
-
-            return true;
         }
     }
 }
