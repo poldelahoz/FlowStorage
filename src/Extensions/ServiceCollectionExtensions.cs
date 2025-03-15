@@ -8,19 +8,6 @@ namespace FlowStorage
 {
     public static class ServiceCollectionExtensions
     {
-        /*public static IServiceCollection AddFlowStorage(this IServiceCollection services)
-        {
-            services.AddSingleton<IFlowStorageFactory, FlowStorageFactory>();
-            services.AddSingleton<IBlobServiceClientFactory, BlobServiceClientFactory>();
-
-            services.AddSingleton<IAzureBlobFlowStorage, AzureBlobFlowStorage>();
-            services.AddSingleton<ILocalFlowStorage, LocalFlowStorage>();
-
-            services.AddSingleton(sp => sp.GetRequiredService<IFlowStorageFactory>().Create());
-
-            return services;
-        }*/
-
         public static IServiceCollection AddFlowStorage(this IServiceCollection services, IConfiguration configuration)
         {
             string storageTypeString = configuration["FlowStorage:type"]
@@ -32,7 +19,6 @@ namespace FlowStorage
                 throw new NotSupportedException($"FlowStorage type '{storageTypeString}' is not supported.");
             }
 
-            //services.AddSingleton<IFlowStorageFactory>(sp => new FlowStorageFactory(sp, configuration));
             services.AddSingleton<IFlowStorageFactory, FlowStorageFactory>();
 
             switch (storageType)
@@ -64,10 +50,6 @@ namespace FlowStorage
                 default:
                     throw new NotSupportedException($"FlowStorage type '{storageType}' is not supported.");
             }
-
-            // Por último, se puede registrar el propio IFlowStorage resolviendo la instancia creada por la fábrica.
-            // Si deseas que se use la instancia creada por la fábrica, puedes agregar:
-            // services.AddSingleton(sp => sp.GetRequiredService<IFlowStorageFactory>().Create());
 
             return services;
         }
