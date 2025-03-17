@@ -55,7 +55,7 @@ Example of *appsettings.json*:
 }
 ```
 
-## Uso
+## Quick start
 
 ### DI configuration
 
@@ -65,7 +65,7 @@ To register the library in the dependency container, use the `AddFlowStorage` ex
 builder.Services.AddFlowStorage(builder.Configuration);
 ```
 
-### Ejemplo de Uso en Código
+### Example of use
 
 ```csharp
 public class MyStorageService
