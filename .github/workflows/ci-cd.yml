@@ -38,7 +38,10 @@ jobs:
           curl -Ls https://coverage.codacy.com/get.sh -o get.sh
           chmod +x get.sh
           ./get.sh
-          codacy-coverage-reporter report -r coverage-report/lcov.info
+          # Buscar la ubicación del reporter y ejecutarlo
+          export CODACY_REPORTER_PATH=$(find $HOME/.cache/codacy/coverage-reporter -type f -name codacy-coverage-reporter | head -n 1)
+          echo "Codacy Coverage Reporter path: $CODACY_REPORTER_PATH"
+          $CODACY_REPORTER_PATH report -r coverage-report/lcov.info
 
       - name: Pack NuGet Package
         run: dotnet pack --no-build --configuration Release -o ./nupkg
