@@ -52,12 +52,13 @@ namespace FlowStorageTests.IntegrationTests.Tests
         public async Task CreateContainerIfNotExistsAsync_CreatesContainerIfNotExistsSuccessfully()
         {
             // Arrange
-            await _azureBlobFlowStorage.DeleteContainerAsync(_containerName);
+            await _azureBlobFlowStorage.DeleteContainerIfExistsAsync(_containerName);
 
             // Act
-            await _azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
+            var result = await _azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
 
             // Assert
+            Assert.True(result);
             var blobServiceClient = new BlobServiceClient(_azuriteFixture.ConnectionString);
             var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
             var existsResponse = await containerClient.ExistsAsync();
@@ -66,15 +67,16 @@ namespace FlowStorageTests.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task DeleteContainerAsync_DeletesContainerIfExistsSuccessfully()
+        public async Task DeleteContainerIfExistsAsync_DeletesContainerIfExistsSuccessfully()
         {
             // Arrange
             await _azureBlobFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
 
             // Act
-            await _azureBlobFlowStorage.DeleteContainerAsync(_containerName);
+            var result = await _azureBlobFlowStorage.DeleteContainerIfExistsAsync(_containerName);
 
             // Assert
+            Assert.True(result);
             var blobServiceClient = new BlobServiceClient(_azuriteFixture.ConnectionString);
             var containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
             var existsResponse = await containerClient.ExistsAsync();
@@ -152,7 +154,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task DeleteFileAsync_RemovesFileFromBlobStorage()
+        public async Task DeleteFileIfExistsAsync_RemovesFileFromBlobStorage()
         {
             // Arrange
             var filePath = "delete.txt";
@@ -161,7 +163,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
             await _azureBlobFlowStorage.UploadFileAsync(_containerName, filePath, content);
 
             // Act
-            await _azureBlobFlowStorage.DeleteFileAsync(_containerName, filePath);
+            await _azureBlobFlowStorage.DeleteFileIfExistsAsync(_containerName, filePath);
 
             // Assert
             await Assert.ThrowsAsync<RequestFailedException>(() => _azureBlobFlowStorage.ReadFileAsync(_containerName, filePath));

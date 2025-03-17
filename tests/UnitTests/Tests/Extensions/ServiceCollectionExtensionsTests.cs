@@ -1,7 +1,8 @@
 ﻿using Azure.Storage.Blobs;
 using FlowStorage;
-using FlowStorage.Abstractions;
+using FlowStorage.Abstractions.Factories;
 using FlowStorage.Abstractions.IBlobWrappers;
+using FlowStorage.Abstractions.Services;
 using FlowStorage.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,43 @@ namespace FlowStorageTests.UnitTests.Tests.Extensions
 {
     public class ServiceCollectionExtensionsTests
     {
+        [Fact]
+        public void AddFlowStorage_RegistersInMemoryStorageServices_WhenConfiguredAsInMemoryStorage()
+        {
+            // Arrange: Configuración para LocalStorage
+            var configValues = new Dictionary<string, string?>
+            {
+                { "FlowStorage:type", "InMemoryStorage" },
+                { "FlowStorage:connectionString", "TestBasePath" }
+            };
+            IConfiguration configuration = BuildConfiguration(configValues);
+            var services = new ServiceCollection();
+            services.AddSingleton(configuration);
+            services.AddLogging();
+
+            // Act: Registra los servicios de FlowStorage según la configuración
+            services.AddFlowStorage(configuration);
+            var provider = services.BuildServiceProvider();
+
+            // Assert:
+            // Se debe registrar el IFlowStorage como alias de ILocalFlowStorage.
+            var flowStorage = provider.GetService<IFlowStorage>();
+            Assert.NotNull(flowStorage);
+            Assert.IsType<InMemoryFlowStorage>(flowStorage);
+
+            // Se debe poder resolver ILocalFlowStorage.
+            var inMemoryStorage = provider.GetService<IInMemoryFlowStorage>();
+            Assert.NotNull(inMemoryStorage);
+
+            // No se debe registrar ILocalFlowStorage.
+            var localStorage = provider.GetService<ILocalFlowStorage>();
+            Assert.Null(localStorage);
+
+            // No se debe registrar IAzureBlobFlowStorage.
+            var azureStorage = provider.GetService<IAzureBlobFlowStorage>();
+            Assert.Null(azureStorage);
+        }
+
         [Fact]
         public void AddFlowStorage_RegistersLocalStorageServices_WhenConfiguredAsLocalStorage()
         {
@@ -42,6 +80,10 @@ namespace FlowStorageTests.UnitTests.Tests.Extensions
             // No se debe registrar IAzureBlobFlowStorage.
             var azureStorage = provider.GetService<IAzureBlobFlowStorage>();
             Assert.Null(azureStorage);
+
+            // No se debe registrar IInMemoryFlowStorage.
+            var inMemoryStorage = provider.GetService<IInMemoryFlowStorage>();
+            Assert.Null(inMemoryStorage);
         }
 
         [Fact]
@@ -83,6 +125,10 @@ namespace FlowStorageTests.UnitTests.Tests.Extensions
             // No se debe registrar ILocalFlowStorage.
             var localStorage = provider.GetService<ILocalFlowStorage>();
             Assert.Null(localStorage);
+
+            // No se debe registrar IInMemoryFlowStorage.
+            var inMemoryStorage = provider.GetService<IInMemoryFlowStorage>();
+            Assert.Null(inMemoryStorage);
         }
 
         [Fact]

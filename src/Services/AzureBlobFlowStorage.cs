@@ -1,8 +1,8 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
+﻿using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
-using FlowStorage.Abstractions;
+using FlowStorage.Abstractions.Factories;
 using FlowStorage.Abstractions.IBlobWrappers;
+using FlowStorage.Abstractions.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,16 +20,10 @@ namespace FlowStorage.Services
 
         public async Task CopyFileAsync(string containerName, string sourceFilePath, string destFilePath)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(sourceFilePath, nameof(sourceFilePath));
             ArgumentException.ThrowIfNullOrEmpty(destFilePath, nameof(destFilePath));
 
-            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            if (!containerClient.Exists())
-            {
-                throw new Exception("Container " + containerName + " does not exist.");
-            }
+            var containerClient = EnsureContainerExists(containerName);
 
             var sourceBlobClient = containerClient.GetBlobClient(sourceFilePath);
             var destinationBlobClient = containerClient.GetBlobClient(destFilePath);
@@ -37,30 +31,44 @@ namespace FlowStorage.Services
             await destinationBlobClient.SyncCopyFromUriAsync(sourceBlobClient.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddMinutes(5)));
         }
 
-        public async Task CreateContainerIfNotExistsAsync(string containerName)
+        public async Task<bool> CreateContainerIfNotExistsAsync(string containerName)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
 
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            if (containerClient.Exists())
+            {
+                return false;
+            }
 
             await containerClient.CreateIfNotExistsAsync();
+
+            return true;
         }
 
-        public async Task DeleteContainerAsync(string containerName)
+        public async Task<bool> DeleteContainerIfExistsAsync(string containerName)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
 
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            if (!containerClient.Exists())
+            {
+                return false;
+            }
 
             await containerClient.DeleteIfExistsAsync();
+
+            return true;
         }
 
-        public async Task DeleteFileAsync(string containerName, string filePath)
+        public async Task DeleteFileIfExistsAsync(string containerName, string filePath)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
 
-            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            var containerClient = EnsureContainerExists(containerName);
+
             var blobClient = containerClient.GetBlobClient(filePath);
 
             await blobClient.DeleteIfExistsAsync();
@@ -68,17 +76,12 @@ namespace FlowStorage.Services
 
         public async Task<Stream> DownloadFileAsync(string containerName, string filePath)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
 
-            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            if (!containerClient.Exists())
-            {
-                throw new Exception("Container " + containerName + " does not exist.");
-            }
+            var containerClient = EnsureContainerExists(containerName);
 
             var blobClient = containerClient.GetBlobClient(filePath);
+
             var response = await blobClient.DownloadAsync();
 
             return response.Value.Content;
@@ -86,15 +89,9 @@ namespace FlowStorage.Services
 
         public async Task<string> ReadFileAsync(string containerName, string filePath)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
 
-            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            if (!containerClient.Exists())
-            {
-                throw new Exception("Container " + containerName + " does not exist.");
-            }
+            var containerClient = EnsureContainerExists(containerName);
 
             var blobClient = containerClient.GetBlobClient(filePath);
 
@@ -105,18 +102,13 @@ namespace FlowStorage.Services
 
         public async Task UploadFileAsync(string containerName, string filePath, string blobContents)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
             ArgumentException.ThrowIfNullOrEmpty(blobContents, nameof(blobContents));
 
-            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            if (!containerClient.Exists())
-            {
-                throw new Exception("Container " + containerName + " does not exist.");
-            }
+            var containerClient = EnsureContainerExists(containerName);
 
             var blobClient = containerClient.GetBlobClient(filePath);
+
             try
             {
                 await blobClient.UploadAsync(BinaryData.FromString(JToken.Parse(blobContents).ToString(Formatting.Indented)), overwrite: true);
@@ -129,8 +121,18 @@ namespace FlowStorage.Services
 
         public async Task UploadFileAsync(string containerName, string filePath, Stream fileStream)
         {
-            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
+
+            var containerClient = EnsureContainerExists(containerName);
+
+            var blobClient = containerClient.GetBlobClient(filePath);
+
+            await blobClient.UploadAsync(fileStream, overwrite: true);
+        }
+
+        private IBlobContainerClientWrapper EnsureContainerExists(string containerName)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
 
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
 
@@ -139,9 +141,7 @@ namespace FlowStorage.Services
                 throw new Exception("Container " + containerName + " does not exist.");
             }
 
-            var blobClient = containerClient.GetBlobClient(filePath);
-
-            await blobClient.UploadAsync(fileStream, overwrite: true);
+            return containerClient;
         }
     }
 }

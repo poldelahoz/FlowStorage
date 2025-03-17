@@ -13,6 +13,7 @@ The library supports both local storage (file system) and Azure Blob Storage, of
 
 ## Supported platforms (adding more soon)
 
+- **In Memory Storage** (Just for test purpose, produces high memory fragmentation)
 - **Local File System**
 - **Azure Blob Storage**
 

@@ -3,27 +3,40 @@ using FlowStorage.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO.Abstractions;
-using FlowStorage.Abstractions;
-using Azure.Storage.Blobs;
 using Moq;
 using FlowStorage.Abstractions.IBlobWrappers;
+using FlowStorage.Abstractions.Factories;
+using FlowStorage;
+using Docker.DotNet.Models;
 
 namespace FlowStorageTests.UnitTests.Tests.Factories
 {
     public class FlowStorageFactoryTests
     {
         [Fact]
+        public void Create_WithAzureBlobStorage_ReturnsIneMemoryFlowStorage()
+        {
+            // Arrange
+            var type = StorageType.InMemoryStorage;
+            var connectionString = "TestConnectionString";
+            IServiceProvider serviceProvider = BuildServiceProvider();
+            var factory = new FlowStorageFactory(serviceProvider, type, connectionString);
+
+            // Act
+            var storage = factory.Create();
+
+            // Assert
+            Assert.IsType<InMemoryFlowStorage>(storage);
+        }
+
+        [Fact]
         public void Create_WithAzureBlobStorage_ReturnsAzureBlobFlowStorage()
         {
             // Arrange
-            var settings = new Dictionary<string, string?>
-            {
-                { "FlowStorage:type", "AzureBlobStorage" },
-                { "FlowStorage:connectionString", "TestConnectionString" }
-            };
-            IConfiguration configuration = BuildConfiguration(settings);
+            var type = StorageType.AzureBlobStorage;
+            var connectionString = "TestConnectionString";
             IServiceProvider serviceProvider = BuildServiceProvider();
-            var factory = new FlowStorageFactory(serviceProvider, configuration);
+            var factory = new FlowStorageFactory(serviceProvider, type, connectionString);
 
             // Act
             var storage = factory.Create();
@@ -36,69 +49,16 @@ namespace FlowStorageTests.UnitTests.Tests.Factories
         public void Create_WithLocalStorage_ReturnsLocalFlowStorage()
         {
             // Arrange
-            var settings = new Dictionary<string, string?>
-            {
-                { "FlowStorage:type", "LocalStorage" },
-                { "FlowStorage:connectionString", "TestConnectionString" }
-            };
-            IConfiguration configuration = BuildConfiguration(settings);
+            var type = StorageType.LocalStorage;
+            var connectionString = "TestConnectionString";
             IServiceProvider serviceProvider = BuildServiceProvider();
-            var factory = new FlowStorageFactory(serviceProvider, configuration);
+            var factory = new FlowStorageFactory(serviceProvider, type, connectionString);
 
             // Act
             var storage = factory.Create();
 
             // Assert
             Assert.IsType<LocalFlowStorage>(storage);
-        }
-
-        [Fact]
-        public void Create_WithUnsupportedStorageType_ThrowsNotSupportedException()
-        {
-            // Arrange
-            var settings = new Dictionary<string, string?>
-            {
-                { "FlowStorage:type", "UnsupportedType" },
-                { "FlowStorage:connectionString", "TestConnectionString" }
-            };
-            IConfiguration configuration = BuildConfiguration(settings);
-            IServiceProvider serviceProvider = BuildServiceProvider();
-
-            // Act & Assert: La excepción se lanza en el constructor, por lo que se debe envolver allí.
-            var exception = Assert.Throws<NotSupportedException>(() =>
-                new FlowStorageFactory(serviceProvider, configuration)
-            );
-            Assert.Contains("UnsupportedType", exception.Message);
-        }
-
-        [Fact]
-        public void Constructor_MissingConnectionString_ThrowsArgumentNullException()
-        {
-            // Arrange: Se omite el connection string para simular el error
-            var settings = new Dictionary<string, string?>
-            {
-                { "FlowStorage:type", "AzureBlobStorage" }
-            };
-            IConfiguration configuration = BuildConfiguration(settings);
-            IServiceProvider serviceProvider = BuildServiceProvider();
-
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new FlowStorageFactory(serviceProvider, configuration));
-        }
-
-        [Fact]
-        public void Constructor_MissingStorageType_ThrowsArgumentNullException()
-        {
-            // Arrange: Se omite el tipo para simular el error
-            var settings = new Dictionary<string, string?>
-            {
-                { "FlowStorage:connectionString", "TestConnectionString" }
-            };
-            IConfiguration configuration = BuildConfiguration(settings);
-            IServiceProvider serviceProvider = BuildServiceProvider();
-
-            // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new FlowStorageFactory(serviceProvider, configuration));
         }
 
         private IServiceProvider BuildServiceProvider()
@@ -116,13 +76,6 @@ namespace FlowStorageTests.UnitTests.Tests.Factories
             services.AddLogging();
 
             return services.BuildServiceProvider();
-        }
-
-        private IConfiguration BuildConfiguration(Dictionary<string, string?> settings)
-        {
-            return new ConfigurationBuilder()
-                .AddInMemoryCollection(settings)
-                .Build();
         }
     }
 }

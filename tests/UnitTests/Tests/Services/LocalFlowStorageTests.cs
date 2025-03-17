@@ -25,27 +25,30 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             var localFlowStorage = CreateLocalFlowStorage(basePath, fileSystem);
 
             // Act
-            await localFlowStorage.CreateContainerIfNotExistsAsync(containerName);
+            var result = await localFlowStorage.CreateContainerIfNotExistsAsync(containerName);
 
-            // Assert: La carpeta del contenedor debe existir.
+            // Assert
+            Assert.True(result);
             Assert.True(fileSystem.Directory.Exists(Path.Combine(basePath, containerName)));
         }
 
         [Fact]
-        public async Task CreateContainerIfNotExistsAsync_ThrowsException_WhenContainerAlreadyExists()
+        public async Task CreateContainerIfNotExistsAsync_ReturnFalse_WhenContainerAlreadyExists()
         {
             // Arrange
             var basePath = @"C:\storage";
             var containerName = "container1";
-            // Simulamos que el contenedor ya existe creando un archivo en ese directorio.
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
             {
                 { Path.Combine(basePath, containerName, "dummy.txt"), new MockFileData("contenido") }
             });
             var localFlowStorage = CreateLocalFlowStorage(basePath, fileSystem);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() => localFlowStorage.CreateContainerIfNotExistsAsync(containerName));
+            // Act
+            var result = await localFlowStorage.CreateContainerIfNotExistsAsync(containerName);
+
+            // Assert
+            Assert.False(result);
         }
 
         [Fact]
@@ -141,7 +144,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteFileAsync_DeletesFile_WhenFileExists()
+        public async Task DeleteFileIfExistsAsync_DeletesFile_WhenFileExists()
         {
             // Arrange
             var basePath = @"C:\storage";
@@ -156,14 +159,14 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             var localFlowStorage = CreateLocalFlowStorage(basePath, fileSystem);
 
             // Act
-            await localFlowStorage.DeleteFileAsync(containerName, fileName);
+            await localFlowStorage.DeleteFileIfExistsAsync(containerName, fileName);
 
             // Assert
             Assert.False(fileSystem.FileExists(Path.Combine(basePath, containerName, fileName)));
         }
 
         [Fact]
-        public async Task DeleteContainerAsync_DeletesContainer_WhenContainerExists()
+        public async Task DeleteContainerIfExistsAsync_DeletesContainer_WhenContainerExists_AndReturnsTrue()
         {
             // Arrange
             var basePath = @"C:\storage";
@@ -174,9 +177,28 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             var localFlowStorage = CreateLocalFlowStorage(basePath, fileSystem);
 
             // Act
-            await localFlowStorage.DeleteContainerAsync(containerName);
+            var result = await localFlowStorage.DeleteContainerIfExistsAsync(containerName);
 
-            // Assert: La carpeta del contenedor ya no debe existir.
+            // Assert
+            Assert.True(result);
+            Assert.False(fileSystem.Directory.Exists(containerPath));
+        }
+
+        [Fact]
+        public async Task DeleteContainerIfExistsAsync_ReturnsFalse_IfContainerNotExists()
+        {
+            // Arrange
+            var basePath = @"C:\storage";
+            var containerName = "container1";
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>());
+            var containerPath = Path.Combine(basePath, containerName);
+            var localFlowStorage = CreateLocalFlowStorage(basePath, fileSystem);
+
+            // Act
+            var result = await localFlowStorage.DeleteContainerIfExistsAsync(containerName);
+
+            // Assert
+            Assert.False(result);
             Assert.False(fileSystem.Directory.Exists(containerPath));
         }
 

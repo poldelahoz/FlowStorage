@@ -1,5 +1,5 @@
 ﻿using Azure.Storage.Blobs;
-using FlowStorage.Abstractions;
+using FlowStorage.Abstractions.Factories;
 using FlowStorage.Abstractions.IBlobWrappers;
 using FlowStorage.Wrappers;
 
