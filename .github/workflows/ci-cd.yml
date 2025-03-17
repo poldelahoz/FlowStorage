@@ -27,14 +27,7 @@ jobs:
 
       - name: Run tests with coverage
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
-      
-      - name: Install Codacy Coverage Reporter
-        shell: bash
-        run: |
-          curl -Ls https://coverage.codacy.com/get.sh -o get.sh
-          chmod +x get.sh
-          ./get.sh
-    
+          
       - name: Publish Coverage Report to Codacy
         shell: bash
         env:
