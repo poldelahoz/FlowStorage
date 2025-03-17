@@ -1,6 +1,6 @@
 ﻿using FlowStorage.Abstractions.IBlobWrappers;
 
-namespace FlowStorage.Abstractions
+namespace FlowStorage.Abstractions.Factories
 {
     internal interface IBlobServiceClientFactory
     {

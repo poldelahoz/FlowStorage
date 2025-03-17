@@ -1,8 +1,8 @@
-﻿using FlowStorage.Abstractions;
-using FlowStorage.Services;
+﻿using FlowStorage.Services;
 using FlowStorage;
 using Microsoft.Extensions.Logging;
 using Moq;
+using FlowStorage.Abstractions.Factories;
 
 namespace FlowStorageTests.UnitTests.Tests.Services
 {
@@ -92,7 +92,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                azureStorage.DeleteContainerAsync(string.Empty));
+                azureStorage.DeleteContainerIfExistsAsync(string.Empty));
         }
 
         [Fact]
@@ -100,15 +100,15 @@ namespace FlowStorageTests.UnitTests.Tests.Services
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                azureStorage.DeleteContainerAsync(null!));
+                azureStorage.DeleteContainerIfExistsAsync(null!));
         }
 
         [Fact]
-        public async Task DeleteFileAsync_ThrowsArgumentException_WhenContainerNameIsEmpty()
+        public async Task DeleteFileIfExistsAsync_ThrowsArgumentException_WhenContainerNameIsEmpty()
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                azureStorage.DeleteFileAsync(string.Empty, "file.txt"));
+                azureStorage.DeleteFileIfExistsAsync(string.Empty, "file.txt"));
         }
 
         [Fact]
@@ -116,23 +116,23 @@ namespace FlowStorageTests.UnitTests.Tests.Services
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                azureStorage.DeleteFileAsync(null!, "file.txt"));
+                azureStorage.DeleteFileIfExistsAsync(null!, "file.txt"));
         }
 
         [Fact]
-        public async Task DeleteFileAsync_ThrowsArgumentException_WhenFilePathIsEmpty()
+        public async Task DeleteFileIfExistsAsync_ThrowsArgumentException_WhenFilePathIsEmpty()
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                azureStorage.DeleteFileAsync("container", string.Empty));
+                azureStorage.DeleteFileIfExistsAsync("container", string.Empty));
         }
 
         [Fact]
-        public async Task DeleteFileAsync_ThrowsArgumentNullException_WhenFilePathIsNull()
+        public async Task DeleteFileIfExistsAsync_ThrowsArgumentNullException_WhenFilePathIsNull()
         {
             var azureStorage = CreateAzureBlobFlowStorage();
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                azureStorage.DeleteFileAsync("container", null!));
+                azureStorage.DeleteFileIfExistsAsync("container", null!));
         }
 
         [Fact]

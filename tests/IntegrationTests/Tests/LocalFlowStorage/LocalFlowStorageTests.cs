@@ -46,7 +46,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task CreateContainerIfNotExistsAsync_CreatesContainerIfNotExistsSuccessfully()
+        public async Task CreateContainerIfNotExistsAsync_CreatesContainerIfNotExistsSuccessfully_And_ReturnsTrue()
         {
             // Arrange
             string expectedPath = Path.Combine(_basePath, _containerName);
@@ -57,24 +57,58 @@ namespace FlowStorageTests.IntegrationTests.Tests
             }
 
             // Act
-            await _localFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
+            var result = await _localFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
 
             // Assert
+            Assert.True(result);
             Assert.True(Directory.Exists(expectedPath));
         }
 
         [Fact]
-        public async Task DeleteContainerAsync_DeletesContainerIfExistsSuccessfully()
+        public async Task CreateContainerIfNotExistsAsync_ReturnsFalse_IfContainerAlreadyExists()
+        {
+            // Arrange
+            string expectedPath = Path.Combine(_basePath, _containerName);
+            Directory.CreateDirectory(expectedPath);
+
+            // Act
+            var result = await _localFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task DeleteContainerAsync_DeletesContainerIfExistsSuccessfully_AndReturnsTrue()
         {
             // Arrange
             string expectedPath = Path.Combine(_basePath, _containerName);
             await _localFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
 
             // Act
-            await _localFlowStorage.DeleteContainerAsync(_containerName);
+            var result = await _localFlowStorage.DeleteContainerIfExistsAsync(_containerName);
 
             // Assert
+            Assert.True(result);
             Assert.False(Directory.Exists(expectedPath));
+        }
+
+        [Fact]
+        public async Task DeleteContainerAsync_ReturnsFalse_IfContainerNotExists()
+        {
+            // Arrange
+            string expectedPath = Path.Combine(_basePath, _containerName);
+
+            if (Directory.Exists(expectedPath))
+            {
+                Directory.Delete(expectedPath, recursive: true);
+            }
+
+            // Act
+            var result = await _localFlowStorage.DeleteContainerIfExistsAsync(_containerName);
+
+            // Assert
+            Assert.False(result);
         }
 
         [Fact]
@@ -150,7 +184,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task DeleteFileAsync_RemovesFileFromBlobStorage()
+        public async Task DeleteFileIfExistsAsync_RemovesFileFromBlobStorage()
         {
             // Arrange
             var filePath = "delete.txt";
@@ -159,7 +193,7 @@ namespace FlowStorageTests.IntegrationTests.Tests
             await _localFlowStorage.UploadFileAsync(_containerName, filePath, content);
 
             // Act
-            await _localFlowStorage.DeleteFileAsync(_containerName, filePath);
+            await _localFlowStorage.DeleteFileIfExistsAsync(_containerName, filePath);
 
             // Assert
             await Assert.ThrowsAsync<Exception>(() => _localFlowStorage.ReadFileAsync(_containerName, filePath));

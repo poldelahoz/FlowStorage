@@ -1,4 +1,4 @@
-﻿namespace FlowStorage.Abstractions
+﻿namespace FlowStorage.Abstractions.Factories
 {
     internal interface IFlowStorageFactory
     {

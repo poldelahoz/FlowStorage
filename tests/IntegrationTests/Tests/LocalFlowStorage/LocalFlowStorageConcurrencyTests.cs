@@ -27,50 +27,28 @@ namespace FlowStorageTests.IntegrationTests.Tests
         {
             // Arrange
             await _localFlowStorage.CreateContainerIfNotExistsAsync(_containerName);
-
             int numberOfFiles = 50;
-            var uploadTasks = new List<Task>();
 
-            for (int i = 0; i < numberOfFiles; i++)
+            // Act: Ejecutar subidas concurrentes
+            await ExecuteConcurrentTasks(numberOfFiles, async fileIndex =>
             {
-                int fileIndex = i;
-                uploadTasks.Add(Task.Run(async () =>
-                {
-                    string fileName = $"file_{fileIndex}.txt";
-                    string content = $"Content of file {fileIndex}";
-                    await _localFlowStorage.UploadFileAsync(_containerName, fileName, content);
-                }));
-            }
-            await Task.WhenAll(uploadTasks);
+                string fileName = $"file_{fileIndex}.txt";
+                string content = $"Content of file {fileIndex}";
+                await _localFlowStorage.UploadFileAsync(_containerName, fileName, content);
+            });
 
-            var downloadTasks = new List<Task>();
-            var exceptions = new List<Exception>();
-
-            for (int i = 0; i < numberOfFiles; i++)
+            // Act: Ejecutar descargas concurrentes y recoger excepciones
+            var exceptions = await ExecuteConcurrentTasks(numberOfFiles, async fileIndex =>
             {
-                int fileIndex = i;
-                downloadTasks.Add(Task.Run(async () =>
-                {
-                    try
-                    {
-                        string fileName = $"file_{fileIndex}.txt";
-                        using var stream = await _localFlowStorage.DownloadFileAsync(_containerName, fileName);
-                        using var reader = new StreamReader(stream);
-                        string content = await reader.ReadToEndAsync();
-                        Assert.Equal($"Content of file {fileIndex}", content);
-                    }
-                    catch (Exception ex)
-                    {
-                        lock (exceptions)
-                        {
-                            exceptions.Add(ex);
-                        }
-                    }
-                }));
-            }
-            await Task.WhenAll(downloadTasks);
+                string fileName = $"file_{fileIndex}.txt";
+                using var stream = await _localFlowStorage.DownloadFileAsync(_containerName, fileName);
+                using var reader = new StreamReader(stream);
+                string content = await reader.ReadToEndAsync();
+                Assert.Equal($"Content of file {fileIndex}", content);
+            }, collectExceptions: true);
 
-            if (exceptions.Count != 0)
+            // Assert: Si se recogieron excepciones, se lanzan en AggregateException
+            if (exceptions.Count > 0)
             {
                 throw new AggregateException(exceptions);
             }
@@ -82,6 +60,40 @@ namespace FlowStorageTests.IntegrationTests.Tests
             {
                 Directory.Delete(_basePath, recursive: true);
             }
+        }
+
+        private async Task<List<Exception>> ExecuteConcurrentTasks(int count, Func<int, Task> taskFunc, bool collectExceptions = false)
+        {
+            var tasks = new List<Task>();
+            var exceptions = new List<Exception>();
+
+            for (int i = 0; i < count; i++)
+            {
+                int index = i; // Capturamos el valor localmente
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        await taskFunc(index);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (collectExceptions)
+                        {
+                            lock (exceptions)
+                            {
+                                exceptions.Add(ex);
+                            }
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }));
+            }
+            await Task.WhenAll(tasks);
+            return exceptions;
         }
     }
 }

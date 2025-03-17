@@ -1,16 +1,14 @@
 ﻿using FlowStorage.Abstractions.Services;
 using Microsoft.Extensions.Logging;
-using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace FlowStorage.Services
 {
-    internal sealed class LocalFlowStorage(
-        string basePath,
-        IFileSystem fileSystem,
-        ILogger<IFlowStorage> logger) : ILocalFlowStorage
+    internal sealed class InMemoryFlowStorage(
+        ILogger<IFlowStorage> logger) : IInMemoryFlowStorage
     {
-        private readonly string _basePath = basePath;
-        private readonly IFileSystem _fileSystem = fileSystem;
+        private readonly string _basePath = Path.GetTempPath();
+        private readonly MockFileSystem _fileSystem = new(new Dictionary<string, MockFileData>());
         private readonly ILogger<IFlowStorage> _logger = logger;
 
         public Task CopyFileAsync(string containerName, string sourceFilePath, string destFilePath)
