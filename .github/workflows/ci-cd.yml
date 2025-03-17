@@ -1,0 +1,51 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests with coverage
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      - name: Publish Coverage Report to Codacy
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: |
+          # Instalar ReportGenerator (herramienta global)
+          dotnet tool install -g dotnet-reportgenerator-globaltool || dotnet tool update -g dotnet-reportgenerator-globaltool
+          # Convertir el reporte a LCOV
+          reportgenerator -reports:"**/coverage.opencover.xml" -targetdir:"coverage-report" -reporttypes:lcov
+          # Descargar e instalar el Codacy Coverage Reporter
+          curl -Ls https://coverage.codacy.com/get.sh | sh
+          # Subir el reporte a Codacy
+          ./codacy-coverage-reporter report -r coverage-report/lcov.info
+
+      - name: Pack NuGet Package
+        run: dotnet pack --no-build --configuration Release -o ./nupkg
+
+      - name: Publish NuGet Package
+        if: github.event_name == 'push'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
