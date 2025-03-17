@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>FlowStorage</PackageId>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Authors>Pol de la Hoz</Authors>
 		<Company>Pol de la Hoz</Company>
 	</PropertyGroup>
@@ -19,7 +19,10 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.IO.Abstractions" Version="22.0.12" />
 	</ItemGroup>
-	
-	
+
+	<PropertyGroup>
+		<RepositoryUrl>https://github.com/poldelahoz/FlowStorage</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
 
 </Project>
