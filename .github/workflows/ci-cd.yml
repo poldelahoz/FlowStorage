@@ -35,7 +35,7 @@ jobs:
           # Instalar ReportGenerator (herramienta global)
           dotnet tool install -g dotnet-reportgenerator-globaltool || dotnet tool update -g dotnet-reportgenerator-globaltool
           # Convertir el reporte a LCOV
-          reportgenerator -reports:"**/coverage.opencover.xml" -targetdir:"coverage-report" -reporttypes:lcov
+          reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage-report" -reporttypes:lcov
           # Descargar e instalar el Codacy Coverage Reporter
           curl -Ls https://coverage.codacy.com/get.sh | sh
           # Subir el reporte a Codacy
