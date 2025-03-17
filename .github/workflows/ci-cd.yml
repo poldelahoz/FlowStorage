@@ -27,20 +27,25 @@ jobs:
 
       - name: Run tests with coverage
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
-
+      
+      - name: Install Codacy Coverage Reporter
+          shell: bash
+          run: |
+            curl -Ls https://coverage.codacy.com/get.sh -o get.sh
+            chmod +x get.sh
+            ./get.sh
+    
       - name: Publish Coverage Report to Codacy
         shell: bash
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
-          # Instalar ReportGenerator (herramienta global)
           dotnet tool install -g dotnet-reportgenerator-globaltool || dotnet tool update -g dotnet-reportgenerator-globaltool
-          # Convertir el reporte a LCOV
           reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage-report" -reporttypes:lcov
-          # Descargar e instalar el Codacy Coverage Reporter
-          curl -Ls https://coverage.codacy.com/get.sh | sh
-          # Subir el reporte a Codacy
-          ./codacy-coverage-reporter report -r coverage-report/lcov.info
+          curl -Ls https://coverage.codacy.com/get.sh -o get.sh
+          chmod +x get.sh
+          ./get.sh
+          codacy-coverage-reporter report -r coverage-report/lcov.info
 
       - name: Pack NuGet Package
         run: dotnet pack --no-build --configuration Release -o ./nupkg
