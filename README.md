@@ -1,97 +1,68 @@
 
-# FlowStorage Library
+# FlowStorage
 
 **FlowStorage is free, but powered by [your donations](https://github.com/sponsors/poldelahoz)**
 
-![NuGet Version](https://img.shields.io/nuget/vpre/FlowStorage)
+[![NuGet Version](https://img.shields.io/nuget/vpre/FlowStorage)](https://www.nuget.org/packages/FlowStorage)
 ![NuGet Downloads](https://img.shields.io/nuget/dt/FlowStorage)
 ![GitHub License](https://img.shields.io/github/license/poldelahoz/FlowStorage)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/691e960f4e1a45e58e3556acaf3adf5c)](https://app.codacy.com/gh/poldelahoz/FlowStorage/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-FlowStorage es una librería desarrollada en .NET 8 que proporciona una abstracción para gestionar el almacenamiento de datos en flujos ("flow storage").  
-La librería permite trabajar tanto con almacenamiento local (sistema de ficheros) como con Azure Blob Storage, ofreciendo una solución flexible y escalable para aplicaciones distribuidas.
+FlowStorage is a library developed in .NET 8 that provides an abstraction for managing data storage.
+The library supports both local storage (file system) and Azure Blob Storage, offering a flexible and scalable solution for distributed applications.
 
-## Características
+## Supported platforms (adding more soon)
 
-- **Abstracciones y Contratos**  
-  Define interfaces que permiten interactuar con el almacenamiento sin depender de implementaciones específicas.
+- **Local File System**
+- **Azure Blob Storage**
 
-- **Soporte para Múltiples Almacenamientos**  
-    - **LocalFlowStorage**: Implementación basada en el sistema de ficheros local.  
-    - **AzureBlobFlowStorage**: Implementación que utiliza Azure Blob Storage (integración con wrappers para facilitar testing y abstraer el SDK).
+## Requirements
 
-- **Patrón Factory**  
-  La clase `FlowStorageFactory` permite crear la implementación correcta de `IFlowStorage` en función de la configuración (mediante enumerados y variables de entorno).
+- .NET 8 or higher
 
-- **Integración con Dependency Injection (DI)**  
-  Extensión `AddFlowStorage` para registrar en el contenedor de dependencias solo las implementaciones necesarias según el tipo de almacenamiento configurado.
+## Installation
 
-- **Tests Unitarios y de Integración**
-  Cobertura completa con tests unitarios, tests de integración (usando TestContainers y Azurite para Azure, y directorios temporales para almacenamiento local), tests de casos extremos y pruebas de concurrencia.
+The library is available on [NuGet.org](https://www.nuget.org/packages/FlowStorage). To install it, simply add the package to your project using the following command:
 
-## Requisitos
+In CLI:
+```bash
+dotnet add package FlowStorage
+```
 
-- .NET 8 o superior
-- Docker (para ejecutar los tests de integración con Azurite a través de TestContainers)
+Or, if you prefer to use the NuGet Package Manager in Visual Studio, search for "FlowStorage" and select the latest version available.
 
-## Instalación
+## Configuration
 
-La librería está disponible en [NuGet.org](https://www.nuget.org). Para instalarla, simplemente añade el paquete a tu proyecto usando el siguiente comando:
+Use `appsettings.json` or environment variables to configure the storage.  
 
-Abre la solución en Visual Studio o ejecuta:
-   ```bash
-   dotnet add package FlowStorage
-   ```
-
-O, si prefieres utilizar el Administrador de paquetes NuGet en Visual Studio, busca "FlowStorage" y selecciona la última versión disponible.
-
-## Configuración
-
-La librería se configura a través de `IConfiguration` y/o variables de entorno.  
-Se requiere definir al menos los siguientes valores:
-
-- **FlowStorage:type** o la variable de entorno **FLOWSTORAGE_TYPE**  
-  Define el tipo de almacenamiento a utilizar. Valores posibles:
+- **FlowStorage:type** or environment variable **FLOWSTORAGE_TYPE**  
+  Defines the type of storage to use. Possible values:
   - `LocalStorage`
   - `AzureBlobStorage`
 
-- **FlowStorage:connectionString** o la variable de entorno **FLOWSTORAGE_CONNECTION_STRING**  
-  Cadena de conexión para el almacenamiento:
-  - Para **LocalStorage**: Ruta base para los archivos.
-  - Para **AzureBlobStorage**: Cadena de conexión de Azure Storage o `"UseDevelopmentStorage=true"` para desarrollo con Azurite.
+- **FlowStorage:connectionString** or environment variable **FLOWSTORAGE_CONNECTION_STRING**  
+  - For **LocalStorage**: Base path for files.
+  - For **AzureBlobStorage**: Azure Storage connection string
 
-Ejemplo de *appsettings.json*:
+Example of *appsettings.json*:
 
 ```json
 {
   "FlowStorage": {
     "type": "AzureBlobStorage",
-    "connectionString": "UseDevelopmentStorage=true"
+    "connectionString": "AccountName={your_account_name};AccountKey={your_account_key};EndpointSuffix={your_endpoint_suffix}"
   }
 }
 ```
 
 ## Uso
 
-### Configuración de DI
+### DI configuration
 
-Para registrar la librería en el contenedor de dependencias, utiliza el método de extensión `AddFlowStorage`. Por ejemplo:
+To register the library in the dependency container, use the `AddFlowStorage` extension method.
 
 ```csharp
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using TuLibreria.Extensions;
-
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
-
-var services = new ServiceCollection();
-services.AddFlowStorage(configuration);
-
-// Ahora puedes inyectar IFlowStorage en tus servicios.
-var serviceProvider = services.BuildServiceProvider();
-var flowStorage = serviceProvider.GetRequiredService<IFlowStorage>();
+builder.Services.AddFlowStorage(builder.Configuration);
 ```
 
 ### Ejemplo de Uso en Código
@@ -116,32 +87,12 @@ public class MyStorageService
 }
 ```
 
-## Tests
+## Contributions
 
-La solución incluye una suite de tests completa:
+Contributions are welcome. Please follow the repository's contribution guidelines and ensure all tests pass before submitting a pull request.
 
-- **Tests Unitarios:**  
-  Validan la lógica de negocio, manejo de excepciones y validaciones de parámetros tanto en `LocalFlowStorage` como en `AzureBlobFlowStorage`.
-
-- **Tests de Integración:**  
-  - **LocalFlowStorage:** Utiliza directorios temporales para probar la lectura/escritura en el sistema de ficheros.  
-  - **AzureBlobFlowStorage:** Se realizan tests de integración contra Azurite, levantado dinámicamente con [TestContainers](https://testcontainers.org/).
-
-- **Tests de Concurrencia y Casos Extremos:**  
-  Se simulan escenarios con operaciones concurrentes, datos muy grandes y caracteres especiales para asegurar la robustez de la librería.
-
-Para ejecutar todos los tests:
-
-```bash
-dotnet test
-```
-
-## Contribuciones
-
-Las contribuciones son bienvenidas. Por favor, sigue las pautas de contribución del repositorio y asegúrate de que todos los tests pasen antes de enviar un pull request.
-
-## Licencia
+## License
 
 [MIT License](LICENSE)
 
-¡Gracias por usar FlowStorage! Si tienes alguna pregunta o sugerencia, no dudes en abrir un issue o contactarnos.
+Thank you for using FlowStorage! If you have any questions or suggestions, please feel free to open an issue or contact me.
