@@ -29,6 +29,7 @@ jobs:
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
 
       - name: Publish Coverage Report to Codacy
+        shell: bash
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         run: |
