@@ -17,7 +17,7 @@ namespace FlowStorage.Services
         {
             EnsureContainerExists(containerName);
             EnsureFileExists(containerName, sourceFilePath);
-            ArgumentException.ThrowIfNullOrEmpty(destFilePath, nameof(destFilePath));
+            EnsurePathExists(containerName, destFilePath);
 
             try
             {
@@ -179,9 +179,14 @@ namespace FlowStorage.Services
             await fileStream.CopyToAsync(file);
         }
 
+        #region Private Methods
+
         private string GetFullPath(string containerName, string filePath) => Path.Combine(_basePath, containerName, filePath);
+
         private bool ContainerExists(string containerName) => _fileSystem.Directory.Exists(GetFullPath(containerName, string.Empty));
+
         private bool FileExists(string containerName, string filePath) => _fileSystem.File.Exists(GetFullPath(containerName, filePath));
+
         private void EnsureContainerExists(string containerName)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
@@ -191,6 +196,7 @@ namespace FlowStorage.Services
                 throw new Exception("Container " + containerName + " does not exist.");
             }
         }
+
         private void EnsureFileExists(string containerName, string filePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
@@ -201,5 +207,21 @@ namespace FlowStorage.Services
                 throw new Exception("File " + filePath + " does not exist in Container " + containerName + ".");
             }
         }
+
+        private void EnsurePathExists(string containerName, string filePath)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
+            ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
+
+            var fullPath = GetFullPath(containerName, filePath);
+            var directory = _fileSystem.Path.GetDirectoryName(fullPath);
+
+            if (!string.IsNullOrEmpty(directory) && !_fileSystem.Directory.Exists(directory))
+            {
+                _fileSystem.Directory.CreateDirectory(directory);
+            }
+        }
+
+        #endregion Private Methods
     }
 }
