@@ -153,6 +153,29 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             blobClientMock.Verify(x => x.UploadAsync(It.IsAny<Stream>(), true), Times.Once);
         }
 
+        [Fact]
+        public void GenerateSaSUri_CallsGenerateSasUri_OnBlobClient()
+        {
+            // Arrange
+            var containerName = "testContainer";
+            var filePath = "file.txt";
+            var expiryTime = DateTimeOffset.UtcNow.AddHours(1);
+            var expectedSasUri = new Uri("https://fake.blob.core.windows.net/testContainer/file.txt?sasToken");
+
+            var (azureStorage, _, blobClientMock) = SetupAzureStorageForBlobOperation(containerName, filePath);
+
+            blobClientMock.Setup(x => x.GenerateSasUri(BlobSasPermissions.Read, expiryTime))
+                          .Returns(expectedSasUri)
+                          .Verifiable();
+
+            // Act
+            string sasUri = azureStorage.GenerateSaSUri(containerName, filePath, expiryTime);
+
+            // Assert
+            Assert.Equal(expectedSasUri.ToString(), sasUri);
+            blobClientMock.Verify(x => x.GenerateSasUri(BlobSasPermissions.Read, expiryTime), Times.Once);
+        }
+
         private (Mock<IBlobClientWrapper> sourceBlobClientMock, Mock<IBlobClientWrapper> destBlobClientMock,
          Mock<IBlobContainerClientWrapper> containerClientMock, Mock<IBlobServiceClientWrapper> serviceClientWrapperMock)
             SetupCopyFileMocks(string containerName, string sourceFile, string destFile, Uri fakeSasUri)

@@ -245,5 +245,15 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 azureStorage.UploadFileAsync("container", null!, new MemoryStream()));
         }
+
+        [Fact]
+        public void GenerateSaSUri_ThrowsArgumentNullException_WhenParametersAreNull()
+        {
+            var azureStorage = CreateAzureBlobFlowStorage();
+            Assert.Throws<ArgumentNullException>(() =>
+                azureStorage.GenerateSaSUri(null!, "file.txt", DateTimeOffset.UtcNow.AddHours(1)));
+            Assert.Throws<ArgumentNullException>(() =>
+                azureStorage.GenerateSaSUri("container", null!, DateTimeOffset.UtcNow.AddHours(1)));
+        }
     }
 }
