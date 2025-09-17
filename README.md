@@ -40,10 +40,12 @@ Use `appsettings.json` or environment variables to configure the storage.
   Defines the type of storage to use. Possible values:
   - `LocalStorage`
   - `AzureBlobStorage`
+  - `InMemoryStorage`
 
 - **FlowStorage:connectionString** or environment variable **FLOWSTORAGE_CONNECTION_STRING**  
   - For **LocalStorage**: Base path for files.
   - For **AzureBlobStorage**: Azure Storage connection string
+  - For **InMemoryStorage**: ignored
 
 Example of *appsettings.json*:
 
