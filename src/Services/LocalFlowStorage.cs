@@ -110,6 +110,11 @@ namespace FlowStorage.Services
             }
         }
 
+        public string GenerateSaSUri(string containerName, string filePath, DateTimeOffset expiryTime)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<string> ReadFileAsync(string containerName, string filePath)
         {
             EnsureContainerExists(containerName);

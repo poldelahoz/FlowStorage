@@ -10,5 +10,6 @@
         Task DeleteFileIfExistsAsync(string containerName, string filePath);
         Task<bool> CreateContainerIfNotExistsAsync(string containerName);
         Task<bool> DeleteContainerIfExistsAsync(string containerName);
+        string GenerateSaSUri(string containerName, string filePath, DateTimeOffset expiryTime);
     }
 }
