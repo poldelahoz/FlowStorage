@@ -87,6 +87,20 @@ namespace FlowStorage.Services
             return response.Value.Content;
         }
 
+        public string GenerateSaSUri(string containerName, string filePath, DateTimeOffset expiryTime)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(containerName, nameof(containerName));
+            ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
+
+            var containerClient = EnsureContainerExists(containerName);
+
+            var blobClient = containerClient.GetBlobClient(filePath);
+
+            var sasUri = blobClient.GenerateSasUri(BlobSasPermissions.Read, expiryTime);
+
+            return sasUri.ToString();
+        }
+
         public async Task<string> ReadFileAsync(string containerName, string filePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
