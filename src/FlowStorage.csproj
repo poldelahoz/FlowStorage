@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageId>FlowStorage</PackageId>
-		<Version>1.2.2</Version>
+		<Version>1.3.0</Version>
 		<Authors>Pol de la Hoz</Authors>
 		<Company>Pol de la Hoz</Company>
 		<PackageReadmeFile>README.md</PackageReadmeFile>

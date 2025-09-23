@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using System.Text;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 
@@ -7,8 +8,8 @@ namespace FlowStorage.Abstractions.IBlobWrappers
     internal interface IBlobClientWrapper
     {
         Task DeleteIfExistsAsync();
-        Task UploadAsync(BinaryData binaryData, bool overwrite);
-        Task UploadAsync(Stream stream, bool overwrite);
+        Task UploadAsync(BinaryData binaryData, bool overwrite = true, Encoding? encoding = null);
+        Task UploadAsync(Stream stream, bool overwrite = true, Encoding? encoding = null);
         Task<Azure.Response<BlobDownloadInfo>> DownloadAsync();
         Task<BlobDownloadResult> DownloadContentAsync();
         Task SyncCopyFromUriAsync(Uri sourceUri);

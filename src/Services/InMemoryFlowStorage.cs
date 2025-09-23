@@ -1,6 +1,7 @@
 ﻿using FlowStorage.Abstractions.Services;
 using Microsoft.Extensions.Logging;
 using System.IO.Abstractions.TestingHelpers;
+using System.Text;
 
 namespace FlowStorage.Services
 {
@@ -133,7 +134,7 @@ namespace FlowStorage.Services
             }
         }
 
-        public async Task UploadFileAsync(string containerName, string filePath, string blobContents)
+        public async Task UploadFileAsync(string containerName, string filePath, string blobContents, Encoding? encoding = null)
         {
             EnsureContainerExists(containerName);
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
@@ -152,7 +153,7 @@ namespace FlowStorage.Services
                 }
 
                 using var stream = _fileSystem.File.OpenWrite(fullPath);
-                using StreamWriter outputFile = new(stream);
+                using StreamWriter outputFile = new(stream, encoding ?? Encoding.UTF8);
 
                 await outputFile.WriteAsync(blobContents);
             }
@@ -162,24 +163,25 @@ namespace FlowStorage.Services
             }
         }
 
-        public async Task UploadFileAsync(string containerName, string filePath, Stream fileStream)
+        public async Task UploadFileAsync(string containerName, string filePath, Stream fileStream, Encoding? encoding = null)
         {
             EnsureContainerExists(containerName);
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
 
             var fullPath = GetFullPath(containerName, filePath);
-
             var directory = _fileSystem.Path.GetDirectoryName(fullPath);
+
             if (!Directory.Exists(directory))
             {
                 ArgumentException.ThrowIfNullOrEmpty(directory, nameof(directory));
-
                 _fileSystem.Directory.CreateDirectory(directory);
             }
 
-            using var file = _fileSystem.File.Create(fullPath);
+            var targetEncoding = encoding ?? Encoding.UTF8;
 
-            await fileStream.CopyToAsync(file);
+            using var reader = new StreamReader(fileStream, targetEncoding);
+            string content = await reader.ReadToEndAsync();
+            await _fileSystem.File.WriteAllTextAsync(fullPath, content, targetEncoding);
         }
 
         private string GetFullPath(string containerName, string filePath) => Path.Combine(_basePath, containerName, filePath);
