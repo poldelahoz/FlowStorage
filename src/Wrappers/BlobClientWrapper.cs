@@ -2,6 +2,8 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using FlowStorage.Abstractions.IBlobWrappers;
+using Azure;
+using System.Text;
 
 namespace FlowStorage.Wrappers
 {
@@ -14,14 +16,44 @@ namespace FlowStorage.Wrappers
             await _blobClient.DeleteIfExistsAsync();
         }
 
-        public async Task UploadAsync(BinaryData binaryData, bool overwrite)
+        public async Task UploadAsync(BinaryData binaryData, bool overwrite = true, Encoding? encoding = null)
         {
-            await _blobClient.UploadAsync(binaryData, overwrite);
+            var options = new BlobUploadOptions();
+
+            if (!overwrite)
+            {
+                options.Conditions = new BlobRequestConditions { IfNoneMatch = new ETag("*") };
+            }
+
+            if (encoding != null)
+            {
+                options.HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = $"text/plain; charset={encoding.WebName}"
+                };
+            }
+
+            await _blobClient.UploadAsync(binaryData, options);
         }
 
-        public async Task UploadAsync(Stream stream, bool overwrite)
+        public async Task UploadAsync(Stream stream, bool overwrite = true, Encoding? encoding = null)
         {
-            await _blobClient.UploadAsync(stream, overwrite);
+            var options = new BlobUploadOptions();
+
+            if (!overwrite)
+            {
+                options.Conditions = new BlobRequestConditions { IfNoneMatch = new ETag("*") };
+            }
+
+            if (encoding != null)
+            {
+                options.HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = $"text/plain; charset={encoding.WebName}"
+                };
+            }
+
+            await _blobClient.UploadAsync(stream, options);
         }
 
         public async Task<Azure.Response<BlobDownloadInfo>> DownloadAsync()

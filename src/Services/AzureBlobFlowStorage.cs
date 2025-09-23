@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs.Models;
+﻿using System.Text;
+using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using FlowStorage.Abstractions.Factories;
 using FlowStorage.Abstractions.IBlobWrappers;
@@ -114,7 +115,7 @@ namespace FlowStorage.Services
             return downloadResult.Content.ToString();
         }
 
-        public async Task UploadFileAsync(string containerName, string filePath, string blobContents)
+        public async Task UploadFileAsync(string containerName, string filePath, string blobContents, Encoding? encoding = null)
         {
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
             ArgumentException.ThrowIfNullOrEmpty(blobContents, nameof(blobContents));
@@ -125,15 +126,15 @@ namespace FlowStorage.Services
 
             try
             {
-                await blobClient.UploadAsync(BinaryData.FromString(JToken.Parse(blobContents).ToString(Formatting.Indented)), overwrite: true);
+                await blobClient.UploadAsync(BinaryData.FromString(JToken.Parse(blobContents).ToString(Formatting.Indented)), true, encoding);
             }
             catch (Exception)
             {
-                await blobClient.UploadAsync(BinaryData.FromString(blobContents), overwrite: true);
+                await blobClient.UploadAsync(BinaryData.FromString(blobContents), true, encoding);
             }
         }
 
-        public async Task UploadFileAsync(string containerName, string filePath, Stream fileStream)
+        public async Task UploadFileAsync(string containerName, string filePath, Stream fileStream, Encoding? encoding = null)
         {
             ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
 
@@ -141,7 +142,7 @@ namespace FlowStorage.Services
 
             var blobClient = containerClient.GetBlobClient(filePath);
 
-            await blobClient.UploadAsync(fileStream, overwrite: true);
+            await blobClient.UploadAsync(fileStream, true, encoding);
         }
 
         private IBlobContainerClientWrapper EnsureContainerExists(string containerName)
