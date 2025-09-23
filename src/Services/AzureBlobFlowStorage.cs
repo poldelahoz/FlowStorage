@@ -112,7 +112,9 @@ namespace FlowStorage.Services
 
             BlobDownloadResult downloadResult = await blobClient.DownloadContentAsync();
 
-            return downloadResult.Content.ToString();
+            Encoding originalEncoding = EncodingExtensions.GetFromContentType(downloadResult.Details.ContentType);
+
+            return originalEncoding.GetString(downloadResult.Content.ToArray());
         }
 
         public async Task UploadFileAsync(string containerName, string filePath, string blobContents, Encoding? encoding = null)
