@@ -5,6 +5,7 @@ using FlowStorage.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO.Abstractions;
+
 namespace FlowStorage
 {
     public static class ServiceCollectionExtensions
