@@ -119,7 +119,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
 
             // Configuramos la secuencia: la primera llamada falla, la segunda tiene éxito.
             blobClientMock
-                .SetupSequence(x => x.UploadAsync(It.IsAny<BinaryData>(), true))
+                .SetupSequence(x => x.UploadAsync(It.IsAny<BinaryData>(), true, null))
                 .ThrowsAsync(new Exception("Simulated failure"))
                 .Returns(Task.CompletedTask);
 
@@ -127,7 +127,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             await azureStorage.UploadFileAsync(containerName, filePath, blobContents);
 
             // Assert: Verificamos que UploadAsync se haya llamado dos veces.
-            blobClientMock.Verify(x => x.UploadAsync(It.IsAny<BinaryData>(), true), Times.Exactly(2));
+            blobClientMock.Verify(x => x.UploadAsync(It.IsAny<BinaryData>(), true, null), Times.Exactly(2));
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             var (azureStorage, _, blobClientMock) = SetupAzureStorageForBlobOperation(containerName, filePath);
 
             // Configuramos el mock para que al llamar a UploadAsync con stream retorne una tarea completada.
-            blobClientMock.Setup(x => x.UploadAsync(It.IsAny<Stream>(), true))
+            blobClientMock.Setup(x => x.UploadAsync(It.IsAny<Stream>(), true, null))
                           .Returns(Task.CompletedTask)
                           .Verifiable();
 
@@ -150,7 +150,7 @@ namespace FlowStorageTests.UnitTests.Tests.Services
             await azureStorage.UploadFileAsync(containerName, filePath, uploadStream);
 
             // Assert
-            blobClientMock.Verify(x => x.UploadAsync(It.IsAny<Stream>(), true), Times.Once);
+            blobClientMock.Verify(x => x.UploadAsync(It.IsAny<Stream>(), true, null), Times.Once);
         }
 
         [Fact]

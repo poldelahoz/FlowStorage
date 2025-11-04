@@ -11,6 +11,11 @@ namespace FlowStorage.Wrappers
     {
         private readonly BlobClient _blobClient = blobClient;
 
+        public async Task<bool> ExistsAsync()
+        {
+            return await _blobClient.ExistsAsync();
+        }
+        
         public async Task DeleteIfExistsAsync()
         {
             await _blobClient.DeleteIfExistsAsync();
@@ -59,6 +64,11 @@ namespace FlowStorage.Wrappers
         public async Task<Azure.Response<BlobDownloadInfo>> DownloadAsync()
         {
             return await _blobClient.DownloadAsync();
+        }
+
+        public async Task<Stream> OpenReadAsync()
+        {
+            return await _blobClient.OpenReadAsync();
         }
 
         public async Task<BlobDownloadResult> DownloadContentAsync()
