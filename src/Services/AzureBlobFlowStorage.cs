@@ -19,6 +19,15 @@ namespace FlowStorage.Services
         private readonly IBlobServiceClientWrapper _blobServiceClient = blobServiceClientFactory.Create(connectionString);
         private readonly ILogger<IFlowStorage> _logger = logger;
 
+        public Task<bool> FileExistsAsync(string containerName, string filePath)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
+
+            var containerClient = EnsureContainerExists(containerName);
+            var blobClient = containerClient.GetBlobClient(filePath);
+            return blobClient.ExistsAsync();
+        }
+
         public async Task CopyFileAsync(string containerName, string sourceFilePath, string destFilePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(sourceFilePath, nameof(sourceFilePath));
@@ -86,6 +95,14 @@ namespace FlowStorage.Services
             var response = await blobClient.DownloadAsync();
 
             return response.Value.Content;
+        }
+
+        public async Task<Stream> OpenReadStreamAsync(string containerName, string filePath)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(filePath, nameof(filePath));
+            var containerClient = EnsureContainerExists(containerName);
+            var blobClient = containerClient.GetBlobClient(filePath);
+            return await blobClient.OpenReadAsync();
         }
 
         public string GenerateSaSUri(string containerName, string filePath, DateTimeOffset expiryTime)

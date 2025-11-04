@@ -14,6 +14,13 @@ namespace FlowStorage.Services
         private readonly IFileSystem _fileSystem = fileSystem;
         private readonly ILogger<IFlowStorage> _logger = logger;
 
+        public Task<bool> FileExistsAsync(string containerName, string filePath)
+        {
+            EnsureContainerExists(containerName);
+            EnsureFileExists(containerName, filePath);
+            return Task.FromResult(true);
+        }
+
         public Task CopyFileAsync(string containerName, string sourceFilePath, string destFilePath)
         {
             EnsureContainerExists(containerName);
@@ -108,6 +115,22 @@ namespace FlowStorage.Services
             catch (Exception ex)
             {
                 throw new Exception("Could not download file " + filePath + " from container " + containerName, ex);
+            }
+        }
+
+        public async Task<Stream> OpenReadStreamAsync(string containerName, string filePath)
+        {
+            EnsureContainerExists(containerName);
+            EnsureFileExists(containerName, filePath);
+
+            try
+            {
+                var fullPath = GetFullPath(containerName, filePath);
+                return _fileSystem.File.OpenRead(fullPath);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not open read stream for file " + filePath + " from container " + containerName, ex);
             }
         }
 
